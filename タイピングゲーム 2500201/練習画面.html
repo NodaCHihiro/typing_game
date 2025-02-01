@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="練習画面.css">
 
 
-    <!-- 追加 -->
+    <!-- /* キーボード表示エリアのスタイル */ -->
     <style>
         .keyboard-display {
             display: flex;
@@ -65,28 +65,32 @@
     </header>
     <main>
         <div class="typing-container">
+            <!-- 操作説明 -->
             <div class="instructions">
                 <p>一時停止：esc ／ 再開：enter</p>
             </div>
 
             <div id="timer-section">
+                <!-- タイマーエリア -->
                 <div class="timer">
                     <h2>タイマー</h2>
                     <p id="timer-display">00:00:00</p>
                 </div>
+                
+                <!-- 正確性表示エリア -->
                 <div class="accuracy">
                     <h2>正確性表示</h2>
                     <p id="updateAccuracy">100%</p>
                 </div>
 
+                <!-- タイピング入力エリア -->
                 <div class="input-area">
                     <div class="type-display" id="typeDisplay"></div> <!-- 漢字表示エリア -->
                     <div class="romaji-display" id="romajiDisplay"></div> <!-- ローマ字表示エリア -->
-                    <!-- <textarea id="typing-input" class="type-input" placeholder="ここにタイピングしてください..."
-                        style="opacity: 0; position: absolute; top: -1000px;" autofocus></textarea> -->
                 </div>
 
-                <div class="keyboard-display" id="keyboardDisplay"></div> <!-- キーボード表示エリア -->
+                <!-- キーボード表示エリア -->
+                <div class="keyboard-display" id="keyboardDisplay"></div>
 
                 <!-- <div class="keyboard-display">
                 <iframe src="キーボード.html" width="100%" height="200px" style="border: none;"></iframe>
@@ -254,17 +258,21 @@
     <div id="popup" class="popup">
         <p>スペースキーを押すと開始します。</p>
     </div>
+     <!-- 確認ダイアログ -->
     <div id="confirm-dialog" class="confirm-dialog">
         <p>確認: ゲームを終了しますか？</p>
         <button id="confirm-yes">はい</button>
         <button id="confirm-no">いいえ</button>
     </div>
+       <!-- ミス時の効果音 -->
     <audio id="mistake-sound" src="mistake.mp3" preload="auto"></audio>
 
+        <!-- JavaScriptの読み込み -->
     <script src="練習画面.js"></script>
     <script>document.addEventListener('DOMContentLoaded', function () {
             const keyElements = {};
 
+   // 画面上のキーボード要素を取得して初期化
             function initializeKeys() {
                 const keys = document.querySelectorAll('.key');
                 keys.forEach(key => {

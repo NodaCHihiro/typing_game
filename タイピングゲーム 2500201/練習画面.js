@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function () {
             currentCharIndex++;
             if (currentCharIndex >= currentRomajiLine.length) {
                 showNextLine();
-                finishTyping(); 
+                finishTyping();
             }
         } else if (convertToHiragana(buffer).length > 0) {
             // 間違った入力の場合の表示
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let accuracy = 100; // 初期値を100%にする
         if (totalTypedChars > 0) {
             accuracy = (correctChars / totalTypedChars) * 100;
-            
+
             // 下記の処理はない状態で正常に動くように計算式を作成するのがただしい
             //accuracy = Math.min(accuracy, 100); // 100%を超えないようにする
         }
@@ -348,19 +348,11 @@ document.addEventListener('DOMContentLoaded', function () {
         resumeTimer();
     });
 
-    //     // キーボードのハイライト処理
-    //     function highlightKey(key) {
-    //   const keyElement = document.querySelector(`#key-${key}`);
-    //   if (keyElement) {
-    //     keyElement.classList.add('active');
-    //   }
-    // }
-
     function unhighlightKey(key) {
-      const keyElement = document.querySelector('#key-' + key.toUpperCase());
-      if (keyElement) {
-        keyElement.classList.remove('active');
-      }
+        const keyElement = document.querySelector('#key-' + key.toUpperCase());
+        if (keyElement) {
+            keyElement.classList.remove('active');
+        }
     }
 
 
@@ -456,11 +448,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 buffer = ''; // バッファをクリア
                 // keybordbuffTextElement.textContent = buffer;
                 return true;
-            } else if (!convertToRomaji(targetChar).some(prefix => prefix.startsWith(hiragana))) {
-                // 子音の段階で間違っている場合、バッファをクリア
-                // mistakeSound.play();
-                buffer = ''; // バッファをクリア
-                // keybordbuffTextElement.textContent = buffer;
+            } else if (!convertToRomaji(targetChar)
+                .forEach(target => {
+                    if (buffer.startsWith(target)) {
+                        buffer = ''; // バッファをクリア
+                    }
+                })) {
+
+                // } else if (!convertToRomaji(targetChar).some(prefix => prefix.startsWith(hiragana))) {
+                //     // 子音の段階で間違っている場合、バッファをクリア
+                //     // mistakeSound.play();
+                //     buffer = ''; // バッファをクリア
+                //     // keybordbuffTextElement.textContent = buffer;
             } else if (buffer.length >= 4) {
                 // 4文字以上の入力でまだ正しくない場合もバッファをクリア
                 // mistakeSound.play();
