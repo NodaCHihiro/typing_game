@@ -15,7 +15,7 @@ let currentPosition = {
 };
 let buffer = ''; // ひらがな入力を一時的に保持するバッファ
 
-document.addEventListener('DOMContentLoaded', function () {
+
     const RORIGINAL_KASHI = []; // 歌詞の配列を初期化
     const ROMAJI_KASHI = []; // ローマ字の配列を初期化
 
@@ -41,6 +41,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmDialog = document.getElementById('confirm-dialog');
     const confirmYes = document.getElementById('confirm-yes');
     const confirmNo = document.getElementById('confirm-no');
+    
+    document.addEventListener('DOMContentLoaded', main);
+
+    function main() {
+        loadJSON();
+        startCountdown();
+    };
+        
+
 
     // JSONファイルを読み込む関数
     async function loadJSON() {
@@ -163,9 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('typing-speed').textContent = `1秒あたりのタイプ数: ${typingSpeed}`;
     }
 
-    // typingInput.addEventListener('input', validateInput);
-
-    /**
+     /**
      * 入力チェックを行う
      * ただし、入力チェック後ターゲット文字の更新も行う
      */
@@ -173,26 +180,24 @@ document.addEventListener('DOMContentLoaded', function () {
         // 現在文字の取得
         currentRomajiLine = ROMAJI_KASHI[currentIndex - 1] || '';
         currentChar = currentRomajiLine[currentCharIndex] || '';
+        const inputHiragana = convertToHiragana(buffer);
 
-        // 入力チェック
-        if (convertToHiragana(buffer).includes(currentChar)) {
-            // 次のターゲット文字の設定
+        // convertToHiraganaとconvertToRomajiの結果を比較する処理を整理する
+        if (inputHiragana.some(hiragana => hiragana === currentChar)) {
             correctChars++;
-            const spans = romajiDisplay.querySelectorAll('span');
-            spans[currentCharIndex].style.color = 'blue';
             currentCharIndex++;
+            buffer = '';
+            updateComparisonText();
             if (currentCharIndex >= currentRomajiLine.length) {
                 showNextLine();
+<<<<<<< HEAD
                 finishTyping();
+=======
+>>>>>>> 2ef9011 (ソースリファクタリング)
             }
-        } else if (convertToHiragana(buffer).length > 0) {
-            // 間違った入力の場合の表示
+        } else if (inputHiragana.length > 0) {
             totalChars++;
-            const spans = romajiDisplay.querySelectorAll('span');
-            if (spans.length) {
-                spans[currentCharIndex].style.color = 'red';
-                // typingInput.value = '';
-            }
+            updateComparisonText();
         }
         updateAccuracy();
     }
@@ -225,6 +230,16 @@ document.addEventListener('DOMContentLoaded', function () {
         // 正確性を画面に表示する
         accuracyDisplay.textContent = `${accuracy}%`;
     }
+    
+    // 入力中の文字を強調表示
+    function updateComparisonText() {
+        const textBefore = comparisonTextElement.textContent.slice(0, currentPosition.index);
+        const textCurrent = comparisonTextElement.textContent.charAt(currentPosition.index);
+        const textAfter = comparisonTextElement.textContent.slice(currentPosition.index + 1);
+        comparisonTextElement.innerHTML = `${textBefore}<span class="highlight">${textCurrent}</span>${textAfter}`;
+    }
+    
+
     // キーボードが押されたときの処理
     document.addEventListener('keydown', function (event) {
         // 入力されたキーボードを取得
@@ -494,8 +509,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         validateInput();
     }
-
-});
 
 /**
 * ターゲット文章のハイライト処理を次の文字に変更する
