@@ -1,0 +1,157 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header,
+footer {
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.ranking-container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 80%;
+  max-width: 1200px;
+  /* 最大横幅を1200pxに設定 */
+}
+
+.ranking-filter {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.ranking-filter label {
+  margin: 0 10px;
+}
+
+.ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ranking-item {
+  border-bottom: 1px solid #ddd;
+  height: 175px;
+  /* 高さを175pxに設定 */
+  color: #16325C;
+  /* 文字色を#16325に設定 */
+}
+
+.ranking-item.even {
+  background-color: #fafbfb;
+  /* 偶数行の背景色を変更 */
+}
+
+.ranking__rank-column,
+.ranking__icon-column,
+.ranking__name-score-column {
+  text-align: center;
+  vertical-align: middle;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background-color: inherit;
+  color: #16325C;
+  /* 文字色を#16325に設定 */
+  font-family: Quicksand, sans-serif;
+}
+
+.ranking__rank-column {
+  width: 150px;
+  /* 横幅を150pxに設定 */
+  font-size: 28px;
+}
+
+.ranking__first-img,
+.ranking__second-img,
+.ranking__third-img {
+  width: 70px;
+  /* アイコンの幅を70pxに設定 */
+  height: 61.66px;
+  /* アイコンの高さを61.66pxに設定 */
+}
+
+.ranking__icon-column {
+  width: 60px;
+  /* 横幅を60pxに設定 */
+}
+
+.ranking__name-score-column {
+  width: 450px;
+  /* 横幅を450pxに設定 */
+  text-align: left;
+}
+
+.ranking__name {
+  font-size: 12.5px;
+  /* ユーザー名のフォントサイズを12.5に設定 */
+  width: 225px;
+  /* ユーザー名の幅を225pxに設定 */
+}
+
+.ranking__score {
+  font-size: 28px;
+  /* スコアの高さを28pxに設定 */
+  width: 187px;
+  /* スコアの幅を187pxに設定 */
+}
+
+.ranking__avatar {
+  width: 60px;
+  /* アイコンの幅を60pxに設定 */
+  height: 60px;
+  /* アイコンの高さを60pxに設定 */
+  border-radius: 50%;
+  /* アイコンを丸くする */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(255, 255, 255);
+  /* 背景色を白に設定 */
+}
+
+.user-ranking {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 2px solid #000;
+  margin-top: 20px;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .ranking-container {
+    width: 90%;
+  }
+}
+
+@media (max-width: 480px) {
+  .ranking-item td {
+    display: block;
+    text-align: center;
+  }
+
+  .user-ranking span {
+    display: block;
+    text-align: center;
+  }
+}
