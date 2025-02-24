@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タイピング練習画面</title>
+    <link rel="stylesheet" href="練習画面.css">
+
+
+    <!-- /* キーボード表示エリアのスタイル */ -->
+    <style>
+        .keyboard-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .key-row {
+            display: flex;
+            margin-bottom: 5px;
+        }
+
+        .key {
+            width: 40px;
+            height: 40px;
+            margin: 2px;
+            background-color: #ddd;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+
+
+        /* スペースキーのスタイル */
+        #key-Space {
+            width: 200px;
+            /* スペースキーの幅を広げる */
+        }
+
+        /* エンターキーのスタイル */
+        #key-Enter {
+            width: 80px;
+            /* エンターキーの幅を広げる */
+        }
+    </style>
+
+
+
+
+</head>
+
+<body>
+    <header>
+        <div class="header-container">
+            <button id="end-button">×終了</button>
+            <h1>タイピング練習</h1>
+        </div>
+    </header>
+    <main>
+        <div class="typing-container">
+            <!-- 操作説明 -->
+            <div class="instructions">
+                <p>一時停止：esc ／ 再開：enter</p>
+            </div>
+
+            <div id="timer-section">
+                <!-- タイマーエリア -->
+                <div class="timer">
+                    <h2>タイマー</h2>
+                    <p id="timer-display">00:00:00</p>
+                </div>
+
+                <!-- 正確性表示エリア -->
+                <div class="accuracy">
+                    <h2>正確性表示</h2>
+                    <p id="updateAccuracy">100%</p>
+                </div>
+
+                <!-- タイピング入力エリア -->
+                <div class="input-area">
+                    <div class="type-display" id="typeDisplay"></div> <!-- 漢字表示エリア -->
+                    <div class="romaji-display" id="romajiDisplay"></div> <!-- ローマ字表示エリア -->
+                </div>
+
+                <!-- キーボード表示エリア -->
+                <div class="keyboard-display" id="keyboardDisplay"></div>
+
+                <!-- <div class="keyboard-display">
+                <iframe src="キーボード.html" width="100%" height="200px" style="border: none;"></iframe>
+            </div> -->
+
+
+
+                <!-- キーボードの表示エリア -->
+                <div class="keyboard-display" id="keyboardDisplay">
+                    <!-- 第一段（アルファベットキー） -->
+                    <div class="key-row">
+                        <div class="key" id="key-Q">Q</div>
+                        <div class="key" id="key-W">W</div>
+                        <div class="key" id="key-E">E</div>
+                        <div class="key" id="key-R">R</div>
+                        <div class="key" id="key-T">T</div>
+                        <div class="key" id="key-Y">Y</div>
+                        <div class="key" id="key-U">U</div>
+                        <div class="key" id="key-I">I</div>
+                        <div class="key" id="key-O">O</div>
+                        <div class="key" id="key-P">P</div>
+                    </div>
+
+                    <!-- 第二段（アルファベットキー） -->
+                    <div class="key-row">
+                        <div class="key" id="key-A">A</div>
+                        <div class="key" id="key-S">S</div>
+                        <div class="key" id="key-D">D</div>
+                        <div class="key" id="key-F">F</div>
+                        <div class="key" id="key-G">G</div>
+                        <div class="key" id="key-H">H</div>
+                        <div class="key" id="key-J">J</div>
+                        <div class="key" id="key-K">K</div>
+                        <div class="key" id="key-L">L</div>
+                    </div>
+
+                    <!-- 第三段（アルファベットキーとEnterキー） -->
+                    <div class="key-row">
+                        <div class="key" id="key-Z">Z</div>
+                        <div class="key" id="key-X">X</div>
+                        <div class="key" id="key-C">C</div>
+                        <div class="key" id="key-V">V</div>
+                        <div class="key" id="key-B">B</div>
+                        <div class="key" id="key-N">N</div>
+                        <div class="key" id="key-M">M</div>
+                        <div class="key" id="key-Enter">Enter</div>
+                    </div>
+
+                    <!-- 特殊キー行 -->
+                    <div class="key-row">
+                        <div class="key" id="key-Space">Space</div>
+                    </div>
+                </div>
+
+
+
+
+
+
+                <div class="character">
+                    <img src="https://prog-8.com/assets/packs/dist/images/faq_wanko-69d64ee9a537b43fad53..svg"
+                        class="faq__Img-sc-9u1v45-2 fHYoRf" alt="アニメ風キャラクター">
+                </div>
+            </div>
+        </div>
+
+        <!-- 結果表示用セクション -->
+        <div id="container">
+            <div id="result-section" style="display: none;">
+                <h2>タイピング結果</h2>
+                <p id="correct-chars"></p>
+                <p id="mistyped-rate"></p>
+                <p id="typing-speed"></p>
+                <div class="character">
+                    <img src="https://prog-8.com/assets/packs/dist/images/faq_wanko-69d64ee9a537b43fad53..svg"
+                        class="faq__Img-sc-9u1v45-2 fHYoRf" alt="アニメ風キャラクター">
+                </div>
+            </div>
+
+
+            <!-- ランキング表示用セクション -->
+
+            <div id="ranking-section" style="display: none;">
+                <h2>ランキング</h2>
+                <div class="ranking-container">
+                    <table class="ranking-table">
+                        <tr class="ranking-item">
+                            <td class="ranking__rank-column"><img class="ranking__first-img"
+                                    src="https://prog-8.com/assets/packs/dist/images/first-b18bb9a0972a00b0bf45..svg"
+                                    alt="1位"></td>
+                            <td class="ranking__icon-column"><img size="60"
+                                    src="https://prog-8.com/assets/default_user_image-147cbfe98d6e858e8ada2bfb2111b29cb325a7441ec3eabe9230355bd8d1d641.jpg"
+                                    class="ranking__avatar"></td>
+                            <td class="ranking__name-score-column">
+                                <div class="ranking__name">プレイヤー名1</div>
+                                <div class="ranking__score">スコア: 1000</div>
+                            </td>
+                        </tr>
+                        <tr class="ranking-item even">
+                            <td class="ranking__rank-column">
+                                <img class="ranking__second-img"
+                                    src="https://prog-8.com/assets/packs/dist/images/second-5b7e3ac162bd2dc2ccbd..svg"
+                                    alt="2位">
+                            </td>
+                            <td class="ranking__icon-column">
+                                <img size="60"
+                                    src="https://prog-8.com/assets/default_user_image-147cbfe98d6e858e8ada2bfb2111b29cb325a7441ec3eabe9230355bd8d1d641.jpg"
+                                    class="ranking__avatar">
+                            </td>
+                            <td class="ranking__name-score-column">
+                                <div class="ranking__name">プレイヤー名2</div>
+                                <div class="ranking__score">スコア</div>
+                            </td>
+                        </tr>
+                        <tr class="ranking-item">
+                            <td class="ranking__rank-column">
+                                <img class="ranking__third-img"
+                                    src="https://prog-8.com/assets/packs/dist/images/third-5abfeb47dbb38c5107f9..svg"
+                                    alt="3位">
+                            </td>
+                            <td class="ranking__icon-column">
+                                <img size="60"
+                                    src="https://prog-8.com/assets/default_user_image-147cbfe98d6e858e8ada2bfb2111b29cb325a7441ec3eabe9230355bd8d1d641.jpg"
+                                    class="ranking__avatar">
+                            </td>
+                            <td class="ranking__name-score-column">
+                                <div class="ranking__name">プレイヤー名3</div>
+                                <div class="ranking__score">スコア</div>
+                            </td>
+                        </tr>
+                        <tr class="ranking-item even">
+                            <td class="ranking__rank-column">4.</td>
+                            <td class="ranking__icon-column">
+                                <img size="60"
+                                    src="https://prog-8.com/assets/default_user_image-147cbfe98d6e858e8ada2bfb2111b29cb325a7441ec3eabe9230355bd8d1d641.jpg"
+                                    class="ranking__avatar">
+                            </td>
+                            <td class="ranking__name-score-column">
+                                <div class="ranking__name">プレイヤー名4</div>
+                                <div class="ranking__score">スコア</div>
+                            </td>
+                        </tr>
+                        <tr class="ranking-item">
+                            <td class="ranking__rank-column">5.</td>
+                            <td class="ranking__icon-column">
+                                <img size="60"
+                                    src="https://prog-8.com/assets/default_user_image-147cbfe98d6e858e8ada2bfb2111b29cb325a7441ec3eabe9230355bd8d1d641.jpg"
+                                    class="ranking__avatar">
+                            </td>
+                            <td class="ranking__name-score-column">
+                                <div class="ranking__name">プレイヤー名5</div>
+                                <div class="ranking__score">スコア</div>
+                            </td>
+                        </tr>
+                    </table>
+
+
+
+                </div>
+            </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 タイピング練習サイト</p>
+    </footer>
+    <div id="popup" class="popup">
+        <p>スペースキーを押すと開始します。</p>
+    </div>
+    <!-- 確認ダイアログ -->
+    <div id="confirm-dialog" class="confirm-dialog">
+        <p>確認: ゲームを終了しますか？</p>
+        <button id="confirm-yes">はい</button>
+        <button id="confirm-no">いいえ</button>
+    </div>
+    <!-- ミス時の効果音 -->
+    <audio id="mistake-sound" src="mistake.mp3" preload="auto"></audio>
+
+    <!-- JavaScriptの読み込み -->
+    <script src="練習画面.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function () {
+            const keyElements = {};
+
+            // 画面上のキーボード要素を取得して初期化
+            function initializeKeys() {
+                const keys = document.querySelectorAll('.key');
+                keys.forEach(key => {
+                    keyElements[key.id] = key;
+                });
+            }
+
+            initializeKeys();
+
+        });
+
+
+
+    </script>
+</body>
+
+</html>

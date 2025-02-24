@@ -42,10 +42,11 @@ const confirmDialog = document.getElementById('confirm-dialog');
 const confirmYes = document.getElementById('confirm-yes');
 const confirmNo = document.getElementById('confirm-no');
 
-
 document.addEventListener('DOMContentLoaded', main);
+
 function main() {
     loadJSON();
+    startCountdown();
 };
 
 
@@ -524,204 +525,74 @@ function convertToRomaji(input) {
 }
 
 
-// 0224追加
+
 /**
  * 入力チェックを行う
  *
- * @param {string} key：入力されたキー
- * @param {string} targetChar：ターゲット文字
+ * @param {String} key：入力されたキー
+ * @param {String} targetChar：ターゲット文字
  */
 function checkInput(key, targetChar) {
+
     if (isHiragana(targetChar)) {
         // ターゲットがひらがなの場合
         buffer += key.toLowerCase(); // 入力された文字をバッファに追加
         const hiragana = convertToHiragana(buffer);
 
-        // 入力がひらがな且つ、ターゲット文字に完全一致する場合
-        if (isHiragana(hiragana) && (hiragana.startsWith(targetChar) || hiragana === targetChar)) {
+        // 入力がひらがな且つ、
+        if (isHiragana(hiragana) && (hiragana.some(prefix => prefix.startsWith(targetChar)) || hiragana.join('') === targetChar)) {
             // 入力が正しい場合、バッファをクリアして次に進む
             currentPosition.index = currentPosition.index + targetChar.length;
-            validateInput(targetChar.length); // validateInputを修正
+            validateInput();
             buffer = ''; // バッファをクリア
+            // keybordbuffTextElement.textContent = buffer;
             return true;
-        } else if (!convertToRomaji(targetChar).some(target => target.startsWith(buffer))) {
-            // 子音の段階で間違っている場合、バッファをクリア
-            buffer = ''; // バッファをクリア
+        } else if (!convertToRomaji(targetChar)
+            .forEach(target => {
+                if (buffer.startsWith(target)) {
+                    buffer = ''; // バッファをクリア
+                }
+            })) {
+
+            // } else if (!convertToRomaji(targetChar).some(prefix => prefix.startsWith(hiragana))) {
+            //     // 子音の段階で間違っている場合、バッファをクリア
+            //     // mistakeSound.play();
+            //     buffer = ''; // バッファをクリア
+            //     // keybordbuffTextElement.textContent = buffer;
         } else if (buffer.length >= 4) {
             // 4文字以上の入力でまだ正しくない場合もバッファをクリア
+            // mistakeSound.play();
             buffer = ''; // バッファをクリア
+            // keybordbuffTextElement.textContent = buffer;
         }
+        // keybordbuffTextElement.textContent = buffer;
     } else if (key.toLowerCase() === targetChar.toLowerCase()) {
         // ターゲットがローマ字の場合でキー入力と一致している場合
         currentPosition.index++;
-        validateInput(1); // validateInputを修正
+        validateInput();
         buffer = ''; // バッファをクリア
+        // keybordbuffTextElement.textContent = buffer;
         return true;
+
     } else if (key.match(/[a-zA-Z!"#$%&'()¥\-?,.<>\[\]]/i)) {
         if (key === toHalfWidth(targetChar) || key === convertToHalfWidth(targetChar)) {
             // 入力が正しい場合、バッファをクリアして次に進む
             currentPosition.index = currentPosition.index + targetChar.length;
-            validateInput(targetChar.length); // validateInputを修正
+            validateInput();
             buffer = ''; // バッファをクリア
+            // keybordbuffTextElement.textContent = buffer;
             return true;
         }
+
     } else {
         // 入力ミス
+        // mistakeSound.play();
         buffer = ''; // バッファをクリア
+        // keybordbuffTextElement.textContent = buffer;
     }
 
-    validateInput(0); // validateInputを修正
-    return false; // デフォルトでfalseを返すように修正
+    validateInput();
 }
-
-/**
- * 入力検証を行う
- *
- * @param {number} length: ターゲット文字の長さ
- */
-function validateInput(length) {
-    // 入力検証の処理
-    // 例: スコアの更新、文字色の変更など
-    console.log(`入力検証: ${length} 文字進む`);
-}
-
-/**
- * ひらがなであるかを判定する
- * @param {string} char 
- * @returns {boolean}
- */
-function isHiragana(char) {
-    return /^[\u3040-\u309F]+$/.test(char);
-}
-
-// hiragana_romaji.json を読み込んだオブジェクトが hiraganaRomajiMap に格納されていると仮定
-
-/**
- * ローマ字からひらがなに変換する
- * @param {string} romaji 
- * @returns {string}
- */
-function convertToHiragana(romaji) {
-    return hiraganaRomajiMap[romaji] || '';
-}
-
-/**
- * ひらがなからローマ字に変換する
- * @param {string} hiragana 
- * @returns {string[]}
- */
-function convertToRomaji(hiragana) {
-    const romajiArray = [];
-    for (const romaji in hiraganaRomajiMap) {
-        if (hiraganaRomajiMap[romaji] === hiragana) {
-            romajiArray.push(romaji);
-        }
-    }
-    return romajiArray;
-}
-
-
-
-/**
- * 全角文字を半角文字に変換する
- * @param {string} str
- * @returns {string}
- */
-function toHalfWidth(str) {
-    return str.replace(/[Ａ-Ｚａ-ｚ０-９]/g, function (s) {
-        return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
-    });
-}
-
-/**
- * 半角文字を全角文字に変換する
- * @param {string} str
- * @returns {string}
- */
-function convertToHalfWidth(str){
-  return str.replace(/[A-Za-z0-9]/g, function(s) {
-    return String.fromCharCode(s.charCodeAt(0) + 0xFEE0);
-  });
-}
-// 0224追加
-
-
-// 0224削除
-// /**
-//  * 入力チェックを行う
-//  *
-//  * @param {String} key：入力されたキー
-//  * @param {String} targetChar：ターゲット文字
-//  */
-// function checkInput(key, targetChar) {
-
-//     if (isHiragana(targetChar)) {
-//         // ターゲットがひらがなの場合
-//         buffer += key.toLowerCase(); // 入力された文字をバッファに追加
-//         const hiragana = convertToHiragana(buffer);
-
-//         // 入力がひらがな且つ、ターゲット文字のいずれかに完全一致する場合   
-//         if (isHiragana(hiragana) && (hiragana.some(prefix => prefix.startsWith(targetChar)) || hiragana.join('') === targetChar)) {
-//             // 入力が正しい場合、バッファをクリアして次に進む
-//             currentPosition.index = currentPosition.index + targetChar.length;
-//             validateInput();
-//             buffer = ''; // バッファをクリアa
-//             // keybordbuffTextElement.textContent = buffer;
-//             return true;
-//         } else if (!convertToRomaji(targetChar)
-//             .some(target => target.startsWith(buffer))) {
-//             // 子音の段階で間違っている場合、バッファをクリア
-//             // mistakeSound.play();
-//             buffer = ''; // バッファをクリア
-
-
-
-
-//             // 0224削除　戻り値がない
-//             // } else if (!convertToRomaji(targetChar)
-//             //     .forEach(target => {
-//             //         if (buffer.startsWith(target)) {
-//             //             buffer = ''; // バッファをクリア
-//             //         }
-//             //     })) {
-//             // 0224削除
-
-//         } else if (buffer.length >= 4) {
-//             // 4文字以上の入力でまだ正しくない場合もバッファをクリア
-//             // mistakeSound.play();
-//             buffer = ''; // バッファをクリア
-//             // keybordbuffTextElement.textContent = buffer;
-//         }
-//         // keybordbuffTextElement.textContent = buffer;
-//     } else if (key.toLowerCase() === targetChar.toLowerCase()) {
-//         // ターゲットがローマ字の場合でキー入力と一致している場合
-//         currentPosition.index++;
-//         validateInput();
-//         buffer = ''; // バッファをクリア
-//         // keybordbuffTextElement.textContent = buffer;
-//         return true;
-
-//     } else if (key.match(/[a-zA-Z!"#$%&'()¥\-?,.<>\[\]]/i)) {
-//         if (key === toHalfWidth(targetChar) || key === convertToHalfWidth(targetChar)) {
-//             // 入力が正しい場合、バッファをクリアして次に進む
-//             currentPosition.index = currentPosition.index + targetChar.length;
-//             validateInput();
-//             buffer = ''; // バッファをクリア
-//             // keybordbuffTextElement.textContent = buffer;
-//             return true;
-//         }
-
-//     } else {
-//         // 入力ミス
-//         // mistakeSound.play();
-//         buffer = ''; // バッファをクリア
-//         // keybordbuffTextElement.textContent = buffer;
-//     }
-
-//     validateInput();
-// }
-// 0224削除
-
 
 /**
 * ターゲット文章のハイライト処理を次の文字に変更する
@@ -731,7 +602,7 @@ function updateComparisonText() {
     const textBefore = comparisonTextElement.textContent.slice(0, currentPosition.index);
     const textCurrent = comparisonTextElement.textContent.charAt(currentPosition.index);
     const textAfter = comparisonTextElement.textContent.slice(currentPosition.index + 1);
-    comparisonTextElement.innerHTML = `${textBefore}<span class="highlight">${textCurrent}</span>${textAfter}`;
+    //comparisonTextElement.innerHTML = `${textBefore}<span class="highlight">${textCurrent}</span>${textAfter}`;
 }
 
 function isHiragana(char) {
