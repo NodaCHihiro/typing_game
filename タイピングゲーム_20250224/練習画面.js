@@ -44,9 +44,9 @@ const confirmNo = document.getElementById('confirm-no');
 
 document.addEventListener('DOMContentLoaded', main);
 
+// ページが読み込まれたときに実行される
 function main() {
-    loadJSON();
-    startCountdown();
+    loadJSON();  // JSONの読み込み
 };
 
 
@@ -242,7 +242,17 @@ document.addEventListener('keydown', function (event) {
     // 入力されたキーボードを取得
     const key = event.key;
 
-    // 入力されたキーが1文字且つ、入力チェックの正規表現にマッチする場合
+    // ゲームの開始・停止処理
+    if (key === 'Escape') {
+        pauseTimer();
+    } else if (key === 'Enter') {
+        resumeTimer();
+    } else if (key === ' ' && !isCountdownStarted) {
+        startCountdown();
+    }
+
+
+    // タイピング処理
     if (key.length === 1 && key.match(/[a-zA-Z!"#$%&'()¥\-?,.<>\[\]]/i)) {
         // ターゲット文字を取得する
         let targetChar = [];
@@ -258,7 +268,6 @@ document.addEventListener('keydown', function (event) {
         }
         if (checkInput(key, targetChar)) {
             // ターゲット文章を全てタイピングした場合、次の文章に更新する
-            // next()
             if (comparisonTextElement.textContent.length === currentPosition.index) {
                 currentPosition.index = 0;
                 currentPosition.line++;
@@ -331,16 +340,6 @@ function resumeTimer() {
 // 入力イベントリスナー
 // typingInput.addEventListener('input', validateInput);
 
-// キーボードイベントリスナー
-document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') {
-        pauseTimer();
-    } else if (event.key === 'Enter') {
-        resumeTimer();
-    } else if (event.key === ' ' && !isCountdownStarted) {
-        startCountdown();
-    }
-});
 
 // 終了ボタンのクリックイベントリスナー
 endButton.addEventListener('click', function () {
@@ -380,7 +379,7 @@ function highlightKey(key, isCorrect) {
 }
 
 // キーボードのキーが離されたときの処理
-document.addEventListener('keyup', (event) => {
+document.addEventListener('keyup', function (event) {
     const key = event.key;
     unhighlightKey(key);
 });
@@ -452,7 +451,7 @@ function checkInput(key, targetChar) {
         buffer += key.toLowerCase(); // 入力された文字をバッファに追加
         const hiragana = convertToHiragana(buffer);
 
-        // 入力がひらがな且つ、
+        // // 入力がひらがな且つ、ターゲット文字のいずれかに完全一致する場合
         if (isHiragana(hiragana) && (hiragana.some(prefix => prefix.startsWith(targetChar)) || hiragana.join('') === targetChar)) {
             // 入力が正しい場合、バッファをクリアして次に進む
             currentPosition.index = currentPosition.index + targetChar.length;
@@ -461,17 +460,10 @@ function checkInput(key, targetChar) {
             // keybordbuffTextElement.textContent = buffer;
             return true;
         } else if (!convertToRomaji(targetChar)
-            .forEach(target => {
-                if (buffer.startsWith(target)) {
-                    buffer = ''; // バッファをクリア
-                }
-            })) {
-
-            // } else if (!convertToRomaji(targetChar).some(prefix => prefix.startsWith(hiragana))) {
-            //     // 子音の段階で間違っている場合、バッファをクリア
-            //     // mistakeSound.play();
-            //     buffer = ''; // バッファをクリア
-            //     // keybordbuffTextElement.textContent = buffer;
+            .some(target => target.startsWith(buffer))) {
+            // 子音の段階で間違っている場合、バッファをクリア
+            // mistakeSound.play();
+            buffer = ''; // バッファをクリア
         } else if (buffer.length >= 4) {
             // 4文字以上の入力でまだ正しくない場合もバッファをクリア
             // mistakeSound.play();
@@ -515,7 +507,7 @@ function updateComparisonText() {
     const textBefore = comparisonTextElement.textContent.slice(0, currentPosition.index);
     const textCurrent = comparisonTextElement.textContent.charAt(currentPosition.index);
     const textAfter = comparisonTextElement.textContent.slice(currentPosition.index + 1);
-    //comparisonTextElement.innerHTML = `${textBefore}<span class="highlight">${textCurrent}</span>${textAfter}`;
+    comparisonTextElement.innerHTML = `${textBefore}<span class="highlight">${textCurrent}</span>${textAfter}`;
 }
 
 function isHiragana(char) {
