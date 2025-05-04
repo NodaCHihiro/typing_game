@@ -33,7 +33,6 @@ let currentRomajiLine;
 
 const typeDisplay = document.getElementById('typeDisplay');
 const romajiDisplay = document.getElementById('romajiDisplay');
-// const typingInput = document.getElementById('typing-input');
 const timerDisplay = document.getElementById('timer-display');
 const accuracyDisplay = document.getElementById('updateAccuracy');
 const popup = document.getElementById('popup');
@@ -98,8 +97,6 @@ function startCountdown() {
 
 // タイマーを開始する関数
 function startTimer() {
-    // typingInput.disabled = false;
-    // typingInput.focus();
     startTime = new Date();
     totalMilliseconds = 0;
     timerInterval = setInterval(updateTimer, 10);
@@ -140,7 +137,6 @@ function showNextLine() {
         });
 
         currentCharIndex = 0;
-        // typingInput.value = '';
         currentIndex++;
     } else {
         finishTyping();
@@ -150,7 +146,6 @@ function showNextLine() {
 // タイピングが終了したときの処理
 function finishTyping() {
     clearInterval(timerInterval);
-    // typingInput.disabled = true;
 
     // 正確に値がカウントされているか確認する
     console.log("正解タイプ数:", correctChars, "合計タイプ数:", totalChars);
@@ -172,6 +167,87 @@ function finishTyping() {
     document.getElementById('typing-speed').textContent = `1秒あたりのタイプ数: ${typingSpeed}`;
 }
 
+
+// //////////////////////////////////////////////////////
+
+// キーボードが押されたときの処理
+function handleKeyDown(event) {
+    // 入力されたキーボードを取得
+    const key = event.key;
+
+    // ゲームの開始・停止処理
+    if (key === 'Escape') {
+        pauseTimer();
+    } else if (key === 'Enter') {
+        resumeTimer();
+    } else if (key === ' ' && !isCountdownStarted) {
+        startCountdown();
+    }
+
+
+    // タイピング処理
+    if (key.length === 1 && key.match(/[a-zA-Z!"#$%&'()¥\-?,.<>\[\]]/i)) {
+        // ターゲット文字を取得する
+        let targetChar = [];
+        targetChar.push(comparisonTextElement.textContent.charAt(currentPosition.index));
+
+        //　促音の場合は次の文字もターゲット文字
+        targetChar = targetChar === 'っ' ? [targetChar + comparisonTextElement.textContent.charAt(currentPosition.index + 1)] : targetChar
+
+        //　「ゃ、ゅ、ょ、ぃ」の拗音判定
+        if (hiraganaRomaji[targetChar + comparisonTextElement.textContent.charAt(currentPosition.index + 1)]) {
+            // ターゲット文字に追加「○ゃ、○ゅ、○ょ、○ぃ」
+            targetChar.push(targetChar + comparisonTextElement.textContent.charAt(currentPosition.index + 1))
+        }
+        if (checkInput(key, targetChar)) {
+            // ターゲット文章を全てタイピングした場合、次の文章に更新する
+            if (comparisonTextElement.textContent.length === currentPosition.index) {
+                currentPosition.index = 0;
+                currentPosition.line++;
+
+                originalTextElement.textContent = RORIGINAL_KASHI[currentPosition.line];
+                comparisonTextElement.textContent = ROMAJI_KASHI[currentPosition.line];
+            }
+            updateComparisonText();
+        };
+    }
+    // 入力キーが現在の文字と一致するかどうかを確認
+    const isCorrect = key === currentChar;
+
+    // ... 入力判定処理 ...
+    highlightKey(key, isCorrect);
+
+};
+
+
+// キーボードのキーが放されたときの処理
+function handleKeyUp(event) {
+    const key = event.key.toUpperCase();
+    console.log(`Key released: ${key}`); // デバッグ用
+    unhighlightKey(key);
+};
+
+
+
+// 終了ボタンのクリックイベントリスナー
+function handleEndButtonClick() {
+    confirmDialog.style.display = 'block';
+    pauseTimer();
+};
+
+// 確認ダイアログで「はい」をクリックしたときの処理
+function handleConfirmYesClick() {
+    confirmDialog.style.display = 'none';
+    location.reload();
+};
+
+// 確認ダイアログで「いいえ」をクリックしたときの処理
+function handleConfirmNoClick() {
+    confirmDialog.style.display = 'none';
+    resumeTimer();
+};
+
+// ////////////////////////////////////////////////////
 /**
 * 入力チェックを行う
 * ただし、入力チェック後ターゲット文字の更新も行う
@@ -236,55 +312,10 @@ function updateComparisonText() {
     comparisonTextElement.innerHTML = `${textBefore}<span class="highlight">${textCurrent}</span>${textAfter}`;
 }
 
-
 // キーボードが押されたときの処理
-document.addEventListener('keydown', function (event) {
-    // 入力されたキーボードを取得
-    const key = event.key;
-
-    // ゲームの開始・停止処理
-    if (key === 'Escape') {
-        pauseTimer();
-    } else if (key === 'Enter') {
-        resumeTimer();
-    } else if (key === ' ' && !isCountdownStarted) {
-        startCountdown();
-    }
+document.addEventListener('keydown', handleKeyDown);
 
 
-    // タイピング処理
-    if (key.length === 1 && key.match(/[a-zA-Z!"#$%&'()¥\-?,.<>\[\]]/i)) {
-        // ターゲット文字を取得する
-        let targetChar = [];
-        targetChar.push(comparisonTextElement.textContent.charAt(currentPosition.index));
-
-        //　促音の場合は次の文字もターゲット文字
-        targetChar = targetChar === 'っ' ? [targetChar + comparisonTextElement.textContent.charAt(currentPosition.index + 1)] : targetChar
-
-        //　「ゃ、ゅ、ょ、ぃ」の拗音判定
-        if (hiraganaRomaji[targetChar + comparisonTextElement.textContent.charAt(currentPosition.index + 1)]) {
-            // ターゲット文字に追加「○ゃ、○ゅ、○ょ、○ぃ」
-            targetChar.push(targetChar + comparisonTextElement.textContent.charAt(currentPosition.index + 1))
-        }
-        if (checkInput(key, targetChar)) {
-            // ターゲット文章を全てタイピングした場合、次の文章に更新する
-            if (comparisonTextElement.textContent.length === currentPosition.index) {
-                currentPosition.index = 0;
-                currentPosition.line++;
-
-                originalTextElement.textContent = RORIGINAL_KASHI[currentPosition.line];
-                comparisonTextElement.textContent = ROMAJI_KASHI[currentPosition.line];
-            }
-            updateComparisonText();
-        };
-    }
-    // 入力キーが現在の文字と一致するかどうかを確認
-    const isCorrect = key === currentChar;
-
-    // ... 入力判定処理 ...
-    highlightKey(key, isCorrect);
-
-});
 
 
 function checkIsCorrect(inputKey) {
@@ -313,18 +344,13 @@ function checkIsCorrect(inputKey) {
 
 
 // キーボードのキーが放されたときの処理
-document.addEventListener('keyup', function (event) {
-    const key = event.key.toUpperCase();
-    console.log(`Key released: ${key}`); // デバッグ用
-    unhighlightKey(key);
-});
+document.addEventListener('keyup', handleKeyUp);
 
 // タイマーを一時停止する関数
 function pauseTimer() {
     if (isPaused) return;
     clearInterval(timerInterval);
     isPaused = true;
-    // typingInput.disabled = true;
 }
 
 // タイマーを再開する関数
@@ -333,31 +359,23 @@ function resumeTimer() {
     startTime = new Date() - totalMilliseconds;
     timerInterval = setInterval(updateTimer, 10);
     isPaused = false;
-    // typingInput.disabled = false;
-    // typingInput.focus();
 }
 
-// 入力イベントリスナー
-// typingInput.addEventListener('input', validateInput);
+
+
 
 
 // 終了ボタンのクリックイベントリスナー
-endButton.addEventListener('click', function () {
-    confirmDialog.style.display = 'block';
-    pauseTimer();
-});
+endButton.addEventListener('click', handleEndButtonClick);
+
 
 // 確認ダイアログで「はい」をクリックしたときの処理
-confirmYes.addEventListener('click', function () {
-    confirmDialog.style.display = 'none';
-    location.reload();
-});
+confirmYes.addEventListener('click', handleConfirmYesClick);
+
 
 // 確認ダイアログで「いいえ」をクリックしたときの処理
-confirmNo.addEventListener('click', function () {
-    confirmDialog.style.display = 'none';
-    resumeTimer();
-});
+confirmNo.addEventListener('click', handleConfirmNoClick);
+
 
 function unhighlightKey(key) {
     const keyElement = document.querySelector('#key-' + key.toUpperCase());
