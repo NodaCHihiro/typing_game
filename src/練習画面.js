@@ -116,31 +116,42 @@ function updateTimer() {
 
 // 次の行を表示する関数
 function showNextLine() {
-    if (currentIndex < RORIGINAL_KASHI.length) {
-        typeDisplay.innerHTML = '';
-        romajiDisplay.innerHTML = '';
-
-        const text = RORIGINAL_KASHI[currentIndex];
-        const romajiText = ROMAJI_KASHI[currentIndex];
-
-        // テキストをスパンで表示
-        text.split('').forEach((char) => {
-            const span = document.createElement('span');
-            span.textContent = char;
-            typeDisplay.appendChild(span);
-        });
-
-        romajiText.split('').forEach((char) => {
-            const span = document.createElement('span');
-            span.textContent = char;
-            romajiDisplay.appendChild(span);
-        });
-
-        currentCharIndex = 0;
-        currentIndex++;
-    } else {
+    // 全ての行が終わっていたら終了処理
+    if
+        (currentIndex >= RORIGINAL_KASHI.length) {
         finishTyping();
+        return;
     }
+
+    // 表示を初期化
+    typeDisplay.innerHTML = '';
+    romajiDisplay.innerHTML = '';
+
+    // 現在の行を取得
+    const text = RORIGINAL_KASHI[currentIndex];
+    const romajiText = ROMAJI_KASHI[currentIndex];
+
+    // 日本語（オリジナル）行をスパンで表示
+    text.split('').forEach((char) => {
+        const span = document.createElement('span');
+        span.textContent = char;
+        typeDisplay.appendChild(span);
+    });
+
+    // ローマ字行をスパンで表示
+    romajiText.split('').forEach((char) => {
+        const span = document.createElement('span');
+        span.textContent = char;
+        romajiDisplay.appendChild(span);
+    });
+
+    // 次の文字に向けて準備
+    currentRomajiLine = romajiText; // この行がないと正誤判定でundefinedになることがある
+
+    currentCharIndex = 0;
+    currentIndex++; // 最後にインクリメント
+
+
 }
 
 // タイピングが終了したときの処理
@@ -253,27 +264,38 @@ function handleConfirmNoClick() {
 * ただし、入力チェック後ターゲット文字の更新も行う
 */
 function validateInput() {
-    // 現在文字の取得
+    // ターゲット文字の取得
     currentRomajiLine = ROMAJI_KASHI[currentIndex - 1] || '';
     currentChar = currentRomajiLine[currentCharIndex] || '';
+
+    // キーボード入力の文字を取得
     const inputHiragana = convertToHiragana(buffer);
 
-    // convertToHiraganaとconvertToRomajiの結果を比較する処理を整理する
-    if (inputHiragana.some(hiragana => hiragana === currentChar)) {
+    if (inputHiragana === currentChar) {
+        // 一致していれば処理を進める
         correctChars++;
         currentCharIndex++;
         buffer = '';
         updateComparisonText();
-        if (currentCharIndex >= currentRomajiLine.length) {
-            showNextLine();
+
+        //  最後の行＆最後の文字をすべて打ち終えたときだけ finishTyping を呼ぶ
+        const isFinalLine = currentIndex >= RORIGINAL_KASHI.length;
+        const isFinalChar = currentCharIndex >= currentRomajiLine.length;
+
+        if (isFinalLine && isFinalChar) {
             finishTyping();
+        } else if (isFinalChar) {
+            showNextLine(); // ← 最終行じゃなければ次の行へ
         }
+
     } else if (inputHiragana.length > 0) {
         totalChars++;
         updateComparisonText();
     }
+
     updateAccuracy();
 }
+
 
 // 正確性を更新する関数
 function updateAccuracy() {
@@ -304,7 +326,7 @@ function updateAccuracy() {
     accuracyDisplay.textContent = `${accuracy}%`;
 }
 
-// 入力中の文字を強調表示
+// ターゲット文字を強調表示
 function updateComparisonText() {
     const textBefore = comparisonTextElement.textContent.slice(0, currentPosition.index);
     const textCurrent = comparisonTextElement.textContent.charAt(currentPosition.index);
@@ -428,8 +450,11 @@ function convertToHiragana(input) {
         result.unshift('っ')
         return result
     }
-    return romajiHiragana[input] || [input];
+    return (romajiHiragana[input] || [input]).toString();
 }
+
+
+
 
 /**
  * ひらがなをローマ字に変換する
@@ -469,8 +494,8 @@ function checkInput(key, targetChar) {
         buffer += key.toLowerCase(); // 入力された文字をバッファに追加
         const hiragana = convertToHiragana(buffer);
 
-        // // 入力がひらがな且つ、ターゲット文字のいずれかに完全一致する場合
-        if (isHiragana(hiragana) && (hiragana.some(prefix => prefix.startsWith(targetChar)) || hiragana.join('') === targetChar)) {
+        // ターゲット文字のいずれかに完全一致する場合
+       if (targetChar.includes(hiragana)) { //TODO: hiragana === targetCharの配列と文字列の比較ができてない
             // 入力が正しい場合、バッファをクリアして次に進む
             currentPosition.index = currentPosition.index + targetChar.length;
             validateInput();
@@ -482,6 +507,9 @@ function checkInput(key, targetChar) {
             // 子音の段階で間違っている場合、バッファをクリア
             // mistakeSound.play();
             buffer = ''; // バッファをクリア
+            
+        // TODO: 入力がひらがなだけど一致していない場合、バッファをクリアする必要がある
+
         } else if (buffer.length >= 4) {
             // 4文字以上の入力でまだ正しくない場合もバッファをクリア
             // mistakeSound.play();
@@ -515,6 +543,7 @@ function checkInput(key, targetChar) {
     }
 
     validateInput();
+
 }
 
 /**
