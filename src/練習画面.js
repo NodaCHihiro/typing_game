@@ -153,6 +153,13 @@ function showNextLine() {
 
 
 }
+// 全角英数字や記号を半角に変換する関数
+function convertToHalfWidth(str) {
+    return str.replace(/[！-～]/g, function (char) {
+        return String.fromCharCode(char.charCodeAt(0) - 0xFEE0);
+    }).replace(/　/g, " "); // 全角スペースを半角スペースに変換
+}
+
 
 // タイピングが終了したときの処理
 function finishTyping() {
@@ -177,9 +184,6 @@ function finishTyping() {
     document.getElementById('mistyped-rate').textContent = `ミスタイプ率: ${mistypedRate}%`;
     document.getElementById('typing-speed').textContent = `1秒あたりのタイプ数: ${typingSpeed}`;
 }
-
-
-// //////////////////////////////////////////////////////
 
 // キーボードが押されたときの処理
 function handleKeyDown(event) {
@@ -495,28 +499,28 @@ function checkInput(key, targetChar) {
         const hiragana = convertToHiragana(buffer);
 
         // ターゲット文字のいずれかに完全一致する場合
-       if (targetChar.includes(hiragana)) { //TODO: hiragana === targetCharの配列と文字列の比較ができてない
+        if (targetChar.includes(hiragana)) {
             // 入力が正しい場合、バッファをクリアして次に進む
             currentPosition.index = currentPosition.index + targetChar.length;
             validateInput();
+            correctChars++;
+            totalChars++;
             buffer = ''; // バッファをクリア
-            // keybordbuffTextElement.textContent = buffer;
-            return true;
-        } else if (!convertToRomaji(targetChar)
-            .some(target => target.startsWith(buffer))) {
-            // 子音の段階で間違っている場合、バッファをクリア
-            // mistakeSound.play();
-            buffer = ''; // バッファをクリア
-            
-        // TODO: 入力がひらがなだけど一致していない場合、バッファをクリアする必要がある
 
-        } else if (buffer.length >= 4) {
-            // 4文字以上の入力でまだ正しくない場合もバッファをクリア
-            // mistakeSound.play();
-            buffer = ''; // バッファをクリア
-            // keybordbuffTextElement.textContent = buffer;
+            return true;
+
+        } else if (convertToRomaji(targetChar)
+            .some(target => target.startsWith(buffer))) {
+            // 子音の段階で合致する場合、何もしない
+            // TODO: mistakeSound.play();
+
+        } else {
+            totalChars++;
+            buffer = ''; // この条件でバッファをクリア        }
+
         }
-        // keybordbuffTextElement.textContent = buffer;
+
+
     } else if (key.toLowerCase() === targetChar.toLowerCase()) {
         // ターゲットがローマ字の場合でキー入力と一致している場合
         currentPosition.index++;
